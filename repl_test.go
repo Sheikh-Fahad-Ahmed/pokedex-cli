@@ -6,25 +6,25 @@ import (
 
 func TestCleanInput(t *testing.T) {
 	cases := []struct {
-		input string
+		input    string
 		expected []string
 	}{
 		{
-			input: " hello world ",
-			expected: []string{"hello","world"},
+			input:    " hello world ",
+			expected: []string{"hello", "world"},
 		},
 		{
-			input: "fahad ahmed ",
+			input:    "fahad ahmed ",
 			expected: []string{"fahad", "ahmed"},
 		},
 		{
-			input: " Golang",
+			input:    " golang",
 			expected: []string{"golang"},
 		},
 	}
 
-	for _,c := range cases {
-		actual := cleanInput((c.input))
+	for _, c := range cases {
+		actual := cleanInput(c.input)
 		if len(actual) != len(c.expected) {
 			t.Errorf("Length of slice is not equal")
 		}
@@ -37,4 +37,3 @@ func TestCleanInput(t *testing.T) {
 		}
 	}
 }
-
