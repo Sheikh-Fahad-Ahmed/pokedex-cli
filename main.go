@@ -8,16 +8,16 @@ import (
 )
 
 type cliCommand struct {
-	name string
+	name        string
 	description string
-	callback func() error
+	callback    func() error
 }
 
-var commands = map[string]cliCommand {
-	"exit":{
-		name : "exit",
+var commands = map[string]cliCommand{
+	"exit": {
+		name:        "exit",
 		description: "Exit the Pokedex",
-		callback: commandExit,
+		callback:    commandExit,
 	},
 }
 
@@ -28,7 +28,15 @@ func main() {
 		if scanner.Scan() {
 			line := scanner.Text()
 			cleanedLine := cleanInput(line)
-			
+			val, ok := commands[cleanedLine[0]]
+			if !ok {
+				fmt.Println("Unknown command")
+			} else {
+				err := val.callback()
+				if err != nil {
+					fmt.Println("Error running the function", err)
+				}
+			}
 		}
 
 	}
@@ -49,14 +57,15 @@ func cleanInput(text string) []string {
 		word += string(char)
 	}
 	if len(word) != 0 {
-		words = append(words, word)
+		words = append(words, strings.ToLower(word))
 	}
 	return words
 }
 
 // All Command Functions
 
-func commandExit() {
+func commandExit() error {
 	fmt.Println("Closing the Pokedex... Goodbye!")
-	os.Exit(0)
+	defer os.Exit(0)
+	return nil
 }
