@@ -15,7 +15,7 @@ type cliCommand struct {
 
 var commands map[string]cliCommand
 
-func init(){
+func init() {
 	commands = map[string]cliCommand{
 		"exit": {
 			name:        "exit",
@@ -23,9 +23,9 @@ func init(){
 			callback:    commandExit,
 		},
 		"help": {
-			name: "help",
+			name:        "help",
 			description: "Display list of commands and the description",
-			callback: commandHelp,
+			callback:    commandHelp,
 		},
 	}
 }
