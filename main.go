@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"github.com/Sheikh-Fahad-Ahmed/pokedex-cli/internal"
 )
 
 type cliCommand struct {
@@ -26,6 +27,11 @@ func init() {
 			name:        "help",
 			description: "Display list of commands and the description",
 			callback:    commandHelp,
+		},
+		"map": {
+			name:        "map",
+			description: "Display list of locations",
+			callback:    getMapList,
 		},
 	}
 }
@@ -81,10 +87,21 @@ func commandExit() error {
 
 func commandHelp() error {
 	fmt.Println("\nWelcome to the Pokedex!")
-	fmt.Println("Usage: \n")
+	fmt.Printf("Usage: \n")
 	for key, value := range commands {
 		fmt.Printf("%s: %s\n", key, value.description)
 	}
 	fmt.Println("")
+	return nil
+}
+
+func getMapList() error {
+	result, err := internal.GetMap()
+	if err != nil {
+		return fmt.Errorf("the error: %w", err)
+	}
+	for _, item := range result {
+		fmt.Println(item.Name)
+	} 
 	return nil
 }
