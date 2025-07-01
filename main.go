@@ -11,7 +11,7 @@ import (
 type cliCommand struct {
 	name        string
 	description string
-	callback    func() error
+	callback    func(*internal.Config) error
 }
 
 var commands map[string]cliCommand
@@ -31,13 +31,20 @@ func init() {
 		"map": {
 			name:        "map",
 			description: "Display list of locations",
-			callback:    getMapList,
+			callback:    commandMap,
+		},
+		"mapb": {
+			name:        "map back",
+			description: "Go to the previous list of the map",
+			callback:    commandMapBack,
 		},
 	}
 }
 
 func main() {
+	config := &internal.Config{}
 	scanner := bufio.NewScanner(os.Stdin)
+
 	for {
 		fmt.Print("Pokedex > ")
 		if scanner.Scan() {
@@ -47,9 +54,9 @@ func main() {
 			if !ok {
 				fmt.Println("Unknown command")
 			} else {
-				err := val.callback()
+				err := val.callback(config)
 				if err != nil {
-					fmt.Println("Error running the function", err)
+					fmt.Println("error running function ", err)
 				}
 			}
 		}
@@ -79,13 +86,13 @@ func cleanInput(text string) []string {
 
 // All Command Functions
 
-func commandExit() error {
+func commandExit(c *internal.Config) error {
 	fmt.Println("Closing the Pokedex... Goodbye!")
 	defer os.Exit(0)
 	return nil
 }
 
-func commandHelp() error {
+func commandHelp(c *internal.Config) error {
 	fmt.Println("\nWelcome to the Pokedex!")
 	fmt.Printf("Usage: \n")
 	for key, value := range commands {
@@ -95,13 +102,43 @@ func commandHelp() error {
 	return nil
 }
 
-func getMapList() error {
-	result, err := internal.GetMap()
+func commandMap(c *internal.Config) error {
+	var result []internal.Item
+	var err error
+	url := "https://pokeapi.co/api/v2/location-area"
+
+	if c.Count == 0 {
+		result, err = internal.GetMap(url, c)
+	} else {
+		result, err = internal.GetMap(*c.Next, c)
+	}
+
+	if err != nil {
+		return fmt.Errorf("the error: %w", err)
+	}
+	c.Count += 1
+
+	for _, item := range result {
+		fmt.Println(item.Name)
+	}
+
+	return nil
+}
+
+func commandMapBack(c *internal.Config) error {
+	if c.Previous == nil {
+		fmt.Println("You are on the first page...")
+		return nil
+	}
+
+	result, err := internal.GetMap(*c.Previous, c)
 	if err != nil {
 		return fmt.Errorf("the error: %w", err)
 	}
 	for _, item := range result {
 		fmt.Println(item.Name)
-	} 
+	}
+
+	c.Count -= 1
 	return nil
 }

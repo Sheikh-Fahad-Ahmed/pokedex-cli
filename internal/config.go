@@ -1,9 +1,10 @@
 package internal
 
 type Config struct {
-	Results  []Item `json:"results"`
-	Next     string `json:"next"`
-	Previous string `json:"previous"`
+	Count    int     `json:"-"`
+	Results  []Item  `json:"results"`
+	Next     *string `json:"next"`
+	Previous *string `json:"previous"`
 }
 
 type Item struct {

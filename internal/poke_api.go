@@ -7,8 +7,9 @@ import (
 	"net/http"
 )
 
-func GetMap() ([]Item, error) {
-	res, err := http.Get("https://pokeapi.co/api/v2/location-area")
+func GetMap(url string, config *Config) ([]Item, error) {
+
+	res, err := http.Get(url)
 	if err != nil {
 		return nil, fmt.Errorf("error Get request: %w", err)
 	}
@@ -18,8 +19,6 @@ func GetMap() ([]Item, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error io read: %w", err)
 	}
-
-	var config Config
 
 	if err := json.Unmarshal(data, &config); err != nil {
 		return nil, fmt.Errorf("error unmarshal json data: %w", err)
