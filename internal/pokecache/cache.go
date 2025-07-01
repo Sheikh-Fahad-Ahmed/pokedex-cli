@@ -30,6 +30,13 @@ func (c *Cache) Add(key string, val []byte) {
 		createdAt: time.Now(),
 		val:       val,
 	}
+}
 
+func (c *Cache) Get(key string) ([]byte, bool) {
+	result,ok := c.data[key]
+	if !ok {
+		return nil, false
+	}
+	return result.val, true
 }
 
