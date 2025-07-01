@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"github.com/Sheikh-Fahad-Ahmed/pokedex-cli/internal"
+
+	"github.com/Sheikh-Fahad-Ahmed/pokedex-cli/internal/api"
 )
 
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(*internal.Config) error
+	callback    func(*api.Config) error
 }
 
 var commands map[string]cliCommand
@@ -42,7 +43,7 @@ func init() {
 }
 
 func main() {
-	config := &internal.Config{}
+	config := &api.Config{}
 	scanner := bufio.NewScanner(os.Stdin)
 
 	for {
@@ -86,13 +87,13 @@ func cleanInput(text string) []string {
 
 // All Command Functions
 
-func commandExit(c *internal.Config) error {
+func commandExit(c *api.Config) error {
 	fmt.Println("Closing the Pokedex... Goodbye!")
 	defer os.Exit(0)
 	return nil
 }
 
-func commandHelp(c *internal.Config) error {
+func commandHelp(c *api.Config) error {
 	fmt.Println("\nWelcome to the Pokedex!")
 	fmt.Printf("Usage: \n")
 	for key, value := range commands {
@@ -102,15 +103,15 @@ func commandHelp(c *internal.Config) error {
 	return nil
 }
 
-func commandMap(c *internal.Config) error {
-	var result []internal.Item
+func commandMap(c *api.Config) error {
+	var result []api.Item
 	var err error
 	url := "https://pokeapi.co/api/v2/location-area"
 
 	if c.Count == 0 {
-		result, err = internal.GetMap(url, c)
+		result, err = api.GetMap(url, c)
 	} else {
-		result, err = internal.GetMap(*c.Next, c)
+		result, err = api.GetMap(*c.Next, c)
 	}
 
 	if err != nil {
@@ -125,13 +126,14 @@ func commandMap(c *internal.Config) error {
 	return nil
 }
 
-func commandMapBack(c *internal.Config) error {
+func commandMapBack(c *api.Config) error {
 	if c.Previous == nil {
 		fmt.Println("You are on the first page...")
+		c.Count = 0
 		return nil
 	}
 
-	result, err := internal.GetMap(*c.Previous, c)
+	result, err := api.GetMap(*c.Previous, c)
 	if err != nil {
 		return fmt.Errorf("the error: %w", err)
 	}
