@@ -5,14 +5,16 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/Sheikh-Fahad-Ahmed/pokedex-cli/internal/api"
+	"github.com/Sheikh-Fahad-Ahmed/pokedex-cli/internal/pokecache"
 )
 
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(*api.Config) error
+	callback    func(*api.Config, *pokecache.Cache) error
 }
 
 var commands map[string]cliCommand
@@ -45,6 +47,8 @@ func init() {
 func main() {
 	config := &api.Config{}
 	scanner := bufio.NewScanner(os.Stdin)
+	cache := pokecache.NewCache(30 * time.Second)
+
 
 	for {
 		fmt.Print("Pokedex > ")
@@ -55,7 +59,7 @@ func main() {
 			if !ok {
 				fmt.Println("Unknown command")
 			} else {
-				err := val.callback(config)
+				err := val.callback(config, cache)
 				if err != nil {
 					fmt.Println("error running function ", err)
 				}
@@ -87,13 +91,13 @@ func cleanInput(text string) []string {
 
 // All Command Functions
 
-func commandExit(c *api.Config) error {
+func commandExit(c *api.Config, cache *pokecache.Cache) error {
 	fmt.Println("Closing the Pokedex... Goodbye!")
 	defer os.Exit(0)
 	return nil
 }
 
-func commandHelp(c *api.Config) error {
+func commandHelp(c *api.Config, cache *pokecache.Cache) error {
 	fmt.Println("\nWelcome to the Pokedex!")
 	fmt.Printf("Usage: \n")
 	for key, value := range commands {
@@ -103,15 +107,15 @@ func commandHelp(c *api.Config) error {
 	return nil
 }
 
-func commandMap(c *api.Config) error {
+func commandMap(c *api.Config, cache *pokecache.Cache) error {
 	var result []api.Item
 	var err error
 	url := "https://pokeapi.co/api/v2/location-area"
 
 	if c.Count == 0 {
-		result, err = api.GetMap(url, c)
+		result, err = api.GetMap(url, c, cache)
 	} else {
-		result, err = api.GetMap(*c.Next, c)
+		result, err = api.GetMap(*c.Next, c, cache)
 	}
 
 	if err != nil {
@@ -126,14 +130,14 @@ func commandMap(c *api.Config) error {
 	return nil
 }
 
-func commandMapBack(c *api.Config) error {
+func commandMapBack(c *api.Config, cache *pokecache.Cache) error {
 	if c.Previous == nil {
 		fmt.Println("You are on the first page...")
 		c.Count = 0
 		return nil
 	}
 
-	result, err := api.GetMap(*c.Previous, c)
+	result, err := api.GetMap(*c.Previous, c, cache)
 	if err != nil {
 		return fmt.Errorf("the error: %w", err)
 	}
@@ -144,3 +148,4 @@ func commandMapBack(c *api.Config) error {
 	c.Count -= 1
 	return nil
 }
+
