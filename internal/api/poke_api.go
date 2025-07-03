@@ -11,9 +11,9 @@ import (
 
 func GetMap(url string, config *Config, cache *pokecache.Cache) ([]Item, error) {
 	var data []byte
-	
+
 	if cached, ok := cache.Get(url); ok {
-		fmt.Println("Using cached data!")
+		fmt.Println("Using cached data!...")
 		data = cached
 	} else {
 		res, err := http.Get(url)
@@ -28,6 +28,7 @@ func GetMap(url string, config *Config, cache *pokecache.Cache) ([]Item, error) 
 		}
 
 		cache.Add(url, data)
+		fmt.Println("data is Cached!..")
 	}
 
 	if err := json.Unmarshal(data, config); err != nil {
@@ -36,4 +37,31 @@ func GetMap(url string, config *Config, cache *pokecache.Cache) ([]Item, error) 
 
 	return config.Results, nil
 
+}
+func GetEncounters(url string, config *EncounterConfig, cache *pokecache.Cache) ([]Item, error) {
+	var data []byte 
+
+	if cached, ok := cache.Get(url); ok {
+		fmt.Println("Using cached data!")
+		data = cached
+	} else {
+		res, err := http.Get(url)
+		if err != nil {
+			return nil, fmt.Errorf("error get request: %w", err)
+		}
+		defer res.Body.Close()
+
+		data, err := io.ReadAll(res.Body)
+		if err != nil {
+			return nil, fmt.Errorf("error io read: %w", err)
+		}
+
+		cache.Add(url, data)
+		fmt.Println("data is Cached!...")
+	}
+
+	if err := json.Unmarshal(data, config); err != nil {
+		return nil, fmt.Errorf("error unmarshal json data: %w",err)
+	} 
+	return config.Encounters, nil
 }
