@@ -38,8 +38,8 @@ func GetMap(url string, config *Config, cache *pokecache.Cache) ([]Item, error) 
 	return config.Results, nil
 
 }
-func GetEncounters(url string, config *EncounterConfig, cache *pokecache.Cache) ([]Item, error) {
-	var data []byte 
+func GetEncounters(url string, config *PokemonEncountersResponse, cache *pokecache.Cache) ([]EncounterConfig, error) {
+	var data []byte
 
 	if cached, ok := cache.Get(url); ok {
 		fmt.Println("Using cached data!")
@@ -51,7 +51,7 @@ func GetEncounters(url string, config *EncounterConfig, cache *pokecache.Cache) 
 		}
 		defer res.Body.Close()
 
-		data, err := io.ReadAll(res.Body)
+		data, err = io.ReadAll(res.Body)
 		if err != nil {
 			return nil, fmt.Errorf("error io read: %w", err)
 		}
@@ -61,7 +61,7 @@ func GetEncounters(url string, config *EncounterConfig, cache *pokecache.Cache) 
 	}
 
 	if err := json.Unmarshal(data, config); err != nil {
-		return nil, fmt.Errorf("error unmarshal json data: %w",err)
-	} 
-	return config.Encounters, nil
+		return nil, fmt.Errorf("error unmarshal json data: %w", err)
+	}
+	return config.PokemonEncounters, nil
 }
