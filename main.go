@@ -254,7 +254,7 @@ func commandInspect(p *api.Pokemon, param string, cache *pokecache.Cache) error 
 		}
 		fmt.Println("Types:")
 		for _, types := range pokemon.Types {
-			fmt.Printf(" - %s", types.Type.Name)
+			fmt.Printf(" - %s\n", types.Type.Name)
 		}
 	}
 	return nil
