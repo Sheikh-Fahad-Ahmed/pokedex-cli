@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"math/rand/v2"
 	"os"
 	"strings"
 	"time"
@@ -29,9 +30,13 @@ func configHandler[T any](fn func(*T, string, *pokecache.Cache) error) func(any,
 	}
 }
 
+var pokedex = make(map[string]api.Pokemon)
 var commands map[string]cliCommand
 
+
+
 func init() {
+
 	commands = map[string]cliCommand{
 		"exit": {
 			name:        "exit",
@@ -63,6 +68,12 @@ func init() {
 			callback:    configHandler(commandExplore),
 			configKind:  "encounterConfig",
 		},
+		"catch": {
+			name:        "catch",
+			description: "Throws a Pokeball to catch the specified Pokemon",
+			callback:    configHandler(commandCatch),
+			configKind:  "pokemonConfig",
+		},
 	}
 }
 
@@ -71,6 +82,7 @@ func main() {
 	configs := map[string]any{
 		"mapConfig":       &api.Config{},
 		"encounterConfig": &api.PokemonEncountersResponse{},
+		"pokemonConfig":   &api.Pokemon{},
 	}
 
 	scanner := bufio.NewScanner(os.Stdin)
@@ -124,6 +136,13 @@ func cleanInput(text string) []string {
 		words = append(words, strings.ToLower(word))
 	}
 	return words
+}
+
+func checkCatch(num int) bool {
+	// percent := 0.45
+	min := num / 2
+	max := int(float64(num) * 1.5)
+	return rand.IntN(max-min+1) + min >= num
 }
 
 // All Command Functions
@@ -197,7 +216,24 @@ func commandExplore(e *api.PokemonEncountersResponse, param string, cache *pokec
 	fmt.Println("Exploring " + param + "...")
 	fmt.Println("Found Pokemon:")
 	for _, item := range results {
-		fmt.Printf(" - %s\n", item.Pokemon.Name)
+		fmt.Printf(" - %s\n", item.PokemonEncounter.Name)
+	}
+	return nil
+}
+
+func commandCatch(p *api.Pokemon, param string, cache *pokecache.Cache) error {
+	url := fmt.Sprintf("https://pokeapi.co/api/v2/pokemon/%s", param)
+	fmt.Printf("Throwing a Pokeball at %s... ", param)
+	result, err := api.GetPokeInfo(url, cache)
+	if err != nil {
+		return fmt.Errorf("catch command error: %w", err)
+	}
+
+	if checkCatch(result.BaseEXP) {
+		fmt.Printf("%s was caught!\n", param)
+		pokedex[param] = result
+	} else {
+		fmt.Printf("%s escaped!\n", param)
 	}
 	return nil
 }

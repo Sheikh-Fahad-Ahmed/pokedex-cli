@@ -1,14 +1,14 @@
 package api
 
 type PokemonEncountersResponse struct {
-	PokemonEncounters []EncounterConfig `json:"pokemon_encounters"`
+	PokemonEncountersConfig []EncounterConfig `json:"pokemon_encounters"`
 }
 
 type EncounterConfig struct {
-	Pokemon Pokemon `json:"pokemon"`
+	PokemonEncounter PokemonEncounter `json:"pokemon"`
 }
 
-type Pokemon struct {
+type PokemonEncounter struct {
 	Name string `json:"name"`
 	URL  string `json:"url"`
 }
