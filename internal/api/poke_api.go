@@ -66,7 +66,7 @@ func GetEncounters(url string, config *PokemonEncountersResponse, cache *pokecac
 	return config.PokemonEncountersConfig, nil
 }
 
-func GetPokeInfo(url string, cache * pokecache.Cache) (Pokemon, error) {
+func GetPokeInfo(url string, cache *pokecache.Cache) (Pokemon, error) {
 	var data []byte
 
 	if cached, ok := cache.Get(url); ok {
@@ -84,13 +84,13 @@ func GetPokeInfo(url string, cache * pokecache.Cache) (Pokemon, error) {
 			return Pokemon{}, fmt.Errorf("error io read: %w", err)
 		}
 
-		cache.Add(url ,data)
+		cache.Add(url, data)
 		fmt.Println("data is Cached...")
 	}
-	
+
 	var result Pokemon
 	if err := json.Unmarshal(data, &result); err != nil {
 		return Pokemon{}, fmt.Errorf("error unmarshal json data: %w", err)
 	}
-	return result, nil 
+	return result, nil
 }

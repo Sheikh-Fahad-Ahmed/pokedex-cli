@@ -33,8 +33,6 @@ func configHandler[T any](fn func(*T, string, *pokecache.Cache) error) func(any,
 var pokedex = make(map[string]api.Pokemon)
 var commands map[string]cliCommand
 
-
-
 func init() {
 
 	commands = map[string]cliCommand{
@@ -72,6 +70,12 @@ func init() {
 			name:        "catch",
 			description: "Throws a Pokeball to catch the specified Pokemon",
 			callback:    configHandler(commandCatch),
+			configKind:  "pokemonConfig",
+		},
+		"inspect": {
+			name:        "inspect",
+			description: "Displays the stats of a Pokemon in your Pokedex",
+			callback:    configHandler(commandInspect),
 			configKind:  "pokemonConfig",
 		},
 	}
@@ -142,7 +146,7 @@ func checkCatch(num int) bool {
 	// percent := 0.45
 	min := num / 2
 	max := int(float64(num) * 1.5)
-	return rand.IntN(max-min+1) + min >= num
+	return rand.IntN(max-min+1)+min >= num
 }
 
 // All Command Functions
@@ -223,7 +227,7 @@ func commandExplore(e *api.PokemonEncountersResponse, param string, cache *pokec
 
 func commandCatch(p *api.Pokemon, param string, cache *pokecache.Cache) error {
 	url := fmt.Sprintf("https://pokeapi.co/api/v2/pokemon/%s", param)
-	fmt.Printf("Throwing a Pokeball at %s... ", param)
+	fmt.Printf("Throwing a Pokeball at %s...\n", param)
 	result, err := api.GetPokeInfo(url, cache)
 	if err != nil {
 		return fmt.Errorf("catch command error: %w", err)
@@ -234,6 +238,24 @@ func commandCatch(p *api.Pokemon, param string, cache *pokecache.Cache) error {
 		pokedex[param] = result
 	} else {
 		fmt.Printf("%s escaped!\n", param)
+	}
+	return nil
+}
+
+func commandInspect(p *api.Pokemon, param string, cache *pokecache.Cache) error {
+	pokemon, ok := pokedex[param]
+	if !ok {
+		fmt.Println("You have not caught this pokemon")
+	} else {
+		fmt.Printf("Name: %s\nHeight: %d\nWeight:%d\n", pokemon.Name, pokemon.Height, pokemon.Weight)
+		fmt.Println("Stats:")
+		for _, stat := range pokemon.Stats {
+			fmt.Printf(" -%s: %d\n", stat.StatInfo.Name, stat.BaseStat)
+		}
+		fmt.Println("Types:")
+		for _, types := range pokemon.Types {
+			fmt.Printf(" - %s", types.Type.Name)
+		}
 	}
 	return nil
 }
