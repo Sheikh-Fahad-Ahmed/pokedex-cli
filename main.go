@@ -103,6 +103,9 @@ func main() {
 		if scanner.Scan() {
 			line := scanner.Text()
 			cleanedLine := cleanInput(line)
+			if len(cleanedLine) == 0 {
+				continue
+			}
 			val, ok := commands[cleanedLine[0]]
 			if !ok {
 				fmt.Println("Unknown command")
