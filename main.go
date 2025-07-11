@@ -78,6 +78,12 @@ func init() {
 			callback:    configHandler(commandInspect),
 			configKind:  "pokemonConfig",
 		},
+		"pokedex": {
+			name:        "pokedex",
+			description: "Displays all the Pokemons in your Pokedex",
+			callback:    configHandler(commandPokedex),
+			configKind:  "pokemonConfig",
+		},
 	}
 }
 
@@ -93,7 +99,7 @@ func main() {
 	cache := pokecache.NewCache(30 * time.Second)
 
 	for {
-		fmt.Print("Pokedex > ")
+		fmt.Printf("\nPokedex > ")
 		if scanner.Scan() {
 			line := scanner.Text()
 			cleanedLine := cleanInput(line)
@@ -210,6 +216,10 @@ func commandMapBack(c *api.Config, param string, cache *pokecache.Cache) error {
 }
 
 func commandExplore(e *api.PokemonEncountersResponse, param string, cache *pokecache.Cache) error {
+	if param == "" {
+		fmt.Println("Please specify a Location from the list given by map command....")
+		return nil
+	}
 	fmt.Println(param)
 	url := "https://pokeapi.co/api/v2/location-area"
 	fullURL := fmt.Sprintf("%s/%s", url, param)
@@ -226,6 +236,10 @@ func commandExplore(e *api.PokemonEncountersResponse, param string, cache *pokec
 }
 
 func commandCatch(p *api.Pokemon, param string, cache *pokecache.Cache) error {
+	if param == "" {
+		fmt.Println("You need to specify a Pokemon...")
+		return nil
+	}
 	url := fmt.Sprintf("https://pokeapi.co/api/v2/pokemon/%s", param)
 	fmt.Printf("Throwing a Pokeball at %s...\n", param)
 	result, err := api.GetPokeInfo(url, cache)
@@ -243,6 +257,10 @@ func commandCatch(p *api.Pokemon, param string, cache *pokecache.Cache) error {
 }
 
 func commandInspect(p *api.Pokemon, param string, cache *pokecache.Cache) error {
+	if param == "" {
+		fmt.Println("Please specify a Pokemon...")
+		return nil
+	}
 	pokemon, ok := pokedex[param]
 	if !ok {
 		fmt.Println("You have not caught this pokemon")
@@ -256,6 +274,18 @@ func commandInspect(p *api.Pokemon, param string, cache *pokecache.Cache) error 
 		for _, types := range pokemon.Types {
 			fmt.Printf(" - %s\n", types.Type.Name)
 		}
+	}
+	return nil
+}
+
+func commandPokedex(p *api.Pokemon, param string, cache *pokecache.Cache) error {
+	if len(pokedex) == 0 {
+		fmt.Println("Your Pokedex is empty...\nTry catching some Pokemons!")
+		return nil
+	}
+	fmt.Println("Your Pokemons:")
+	for pokemon := range pokedex {
+		fmt.Printf(" - %s\n", pokemon)
 	}
 	return nil
 }
